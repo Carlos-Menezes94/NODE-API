@@ -1,33 +1,40 @@
 import { httpResponse, httpRequest, Controller, EmailValidator } from '../protocols/'
 import { MissingParamError, InvalidParamError } from '../errors'
 import { badRequest, serverError } from '../helpers/http-helpers'
+import { AddAccount } from '../../domain/usercase/add-account'
 
 export class SignUpController implements Controller {
-    private readonly emailValitador: EmailValidator
+    private readonly emailValidator: EmailValidator
+    private readonly addAccount: AddAccount
 
-    constructor (emailValidator: any) {
-        this.emailValitador = emailValidator
+    constructor (emailValidator: EmailValidator, addAccount: AddAccount) {
+        this.emailValidator = emailValidator
+        this.addAccount = addAccount    
     }
 
     handle (httpRequest: httpRequest): httpResponse {
         try {    
             const requiredFileds = ['name', 'email', 'password', 'passwordConfirmation']
             for (const field of requiredFileds) {
-                    if (!httpRequest.body[field]) {
-                        return badRequest(new MissingParamError(field))
-                    }
-                } 
-                
-                if (httpRequest.body.password !== httpRequest.body.passwordConfirmation)
-                    return badRequest (new InvalidParamError('passwordConfirmation'))
-                const  isValid = this.emailValitador.isValid(httpRequest.body.email)   
-                if (!isValid) {
-                    return badRequest(new InvalidParamError ('email'))
+                if (!httpRequest.body[field]) {
+                    return badRequest(new MissingParamError(field))
                 }
-        } 
-
-                catch(error) {
-                return serverError()
-                 }     
+            } 
+            const { name, email, password, passwordConfirmation} = httpRequest.body
+            if (password !== passwordConfirmation){
+                return badRequest (new InvalidParamError('passwordConfirmation'))
+            }
+            const  isValid = this.emailValidator.isValid(email)   
+            if (!isValid) {
+                return badRequest(new InvalidParamError('email'))
+            }
+            this.addAccount.add ({
+                name,
+                email,
+                password
+            })
+            }catch (error) {
+            return serverError()
+            }     
     }    
-}
+}    
