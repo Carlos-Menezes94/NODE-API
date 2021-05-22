@@ -20,7 +20,7 @@ const makeAddAccount = (): AddAccount => {
                 email: 'valid_email@mail.com',
                 password: 'valid_password'
             }
-            return new Promise (resolve => (fakeAccount)) 
+            return new Promise (resolve => resolve(fakeAccount)) 
         }
     }
     return new AddAccountStub ()
@@ -58,7 +58,7 @@ describe('SignUp Controller', () => {
         expect (httpResponse.body).toEqual (new MissingParamError('name'))
     })
 
-    test('Should return 400 if no email is provided', async() => {
+    test('Should return 400 if no email is provided', async () => {
         const { sut } = makeSut ()
         const httpRequest = {
             body:{
@@ -171,7 +171,7 @@ describe('SignUp Controller', () => {
     test('Should return 500 if AddAccount throws', async() => {
         const { sut, addAccountStub} = makeSut ()
         jest.spyOn(addAccountStub, 'add').mockImplementationOnce(() =>{
-            throw new Error()
+            return new  Promise((resolve, reject) => reject(new Error()))
         })
         const httpRequest = {
             body: {
