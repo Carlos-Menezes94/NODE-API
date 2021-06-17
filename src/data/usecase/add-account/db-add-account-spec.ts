@@ -1,5 +1,4 @@
-import { resolve } from 'path/posix'
-import { Encrypter } from '../../protocols/encrypter'
+import { Encrypter } from '../add-account/db-add-account-protocols'
 import { DbAddAccount } from './db-add-account'
 
 interface SutTypes {
